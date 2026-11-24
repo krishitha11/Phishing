@@ -1,48 +1,30 @@
-# Explainable Phishing Email Detection
+# WhatsApp Spam Message Detection
 
-Atria Institute of Technology, Dept. of CSE. Review 1 project.
-Compares a TF-IDF + SVM baseline with a fine-tuned RoBERTa model, tests both on
-modified emails and on other data sources, and (planned) explains predictions with LIME.
+A machine-learning project to identify spam messages intended for WhatsApp. The initial baseline described in Review 1 classifies SMS messages as spam or legitimate; WhatsApp-specific data and evaluation are still needed before claiming performance on WhatsApp messages.
 
-## Data
-* Main dataset: Kaggle "Phishing Email Dataset" (Naser Abdullah Alam), ~82,000 emails from
-  Enron, Ling, CEAS-08, Nazario, Nigerian Fraud and SpamAssassin. Check the licence before reuse.
-* External check: Hugging Face `zefang-liu/phishing-email-dataset` (LGPL-3.0). Part of its
-  content comes from the same public corpora, so it is not fully independent.
-* The `data/` folder holds a small version (emails cut to 1,500 characters, 3,000 rows per test set)
-  so it fits on GitHub. Full files are not included.
+This project detects spam-like messages. It does not verify whether a message's factual claims are true.
 
-## Method
-1. Remove duplicates, then split 70/15/15 **before** any modification (no leakage).
-2. TF-IDF + linear SVM baseline.
-3. Robustness: typos, synonym swaps and character swaps applied to a copy of the test set only.
-4. External test on the Hugging Face dataset (emails already seen are removed).
-5. Leave-one-source-out: train on five sources, test on the sixth.
-6. RoBERTa (`roberta-base`) fine-tuned on Colab, tested on the same files.
+## Review 1 baseline
 
-## Run order
-| File | What it does |
-|---|---|
-| `01_baseline.py` | clean, deduplicate, split, SVM baseline |
-| `02_robustness.py` | modified test sets and scores (`--rate 0.4` for stronger edits) |
-| `03_external_test.py` | test on another dataset |
-| `04_leave_one_source_out.py` | generalization across sources |
-| `make_repo_data.py` | builds the small `data/` folder |
-| `05_roberta_colab.ipynb` | RoBERTa fine-tuning (Colab, T4 GPU) |
+The presentation describes a local message-classification app using:
 
-## Results so far (TF-IDF + SVM, full 12,305-email test set)
-| Test set | Accuracy | False-positive rate |
-|---|---|---|
-| Clean | 0.9935 | 0.0077 |
-| Typos (40% of words) | 0.9872 | 0.0187 |
-| Synonyms (40%) | 0.9934 | 0.0077 |
-| Character swaps (40%) | 0.9852 | 0.0258 |
-| All combined | 0.9839 | 0.0270 |
-| External (Hugging Face) | 0.9936 | 0.0042 |
+- The UCI SMS Spam Collection, with 5,159 unique messages after exact-duplicate removal.
+- TF-IDF text features and a calibrated linear SVM.
+- A prediction, confidence score, and influential terms for each message.
+- A stratified holdout result reported as 98.55% accuracy, 0.95 spam precision, and 0.93 spam recall.
 
-High clean accuracy may partly reflect source style (e.g. Enron vs Nazario), so the
-leave-one-source-out test is the stronger generalization check.
-RoBERTa and leave-one-source-out results: to be added.
+These metrics are reported in the presentation and are SMS results. They have not been reproduced from the code currently in this repository, and they should not be presented as WhatsApp-specific results.
 
-## Limits
-Controlled offline tests only. No claim of production-level security.
+## Repository status
+
+The files currently checked into this repository are from an earlier phishing-email project. For example, `data/` contains email datasets, `01_baseline.py` trains an email classifier, and `app.py` expects a fine-tuned RoBERTa email model with LIME explanations. They do not implement the SMS baseline described above or a WhatsApp spam detector.
+
+The next implementation step is to add the SMS spam dataset, baseline model, and message interface described in Review 1, then evaluate on WhatsApp-specific messages before reporting WhatsApp performance.
+
+## Intended scope
+
+- Classify spam and legitimate message text that may be shared through WhatsApp.
+- Start with an SMS spam baseline and explain the terms that influence its prediction.
+- Evaluate the classifier on WhatsApp-specific data before making WhatsApp performance claims.
+
+This is a research prototype, not a guarantee that a message is safe or harmful.
